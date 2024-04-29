@@ -5,6 +5,25 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
+class ParentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ('id', 'title',)
+        
+
+class TaskSerializer(serializers.ModelSerializer):
+    parents = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    
+    class Meta:
+        model = Task
+        fields = ('id', 'local_id', 'title', 'duration', 'parents')
+        
+        
+class CreateTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ('local_id', 'title', 'duration', 'parents')
+        
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +34,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ('name', 'partner', 'address')
+        fields = ('id', 'name', 'partner', 'address')
         
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
@@ -25,7 +44,7 @@ class LocationSerializer(serializers.ModelSerializer):
 class ContractorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contractor
-        fields = '__all__'
+        fields = ('id', 'name', 'partner',)
         
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
@@ -35,7 +54,8 @@ class ContractorSerializer(serializers.ModelSerializer):
 class PartnerSerializer(serializers.ModelSerializer):
     locations = LocationSerializer(many=True, read_only=True)
     contractors = ContractorSerializer(many=True, read_only=True)
-
+    tasks = TaskSerializer(many=True)
+    
     class Meta:
         model = Partner
         fields = '__all__'
@@ -44,6 +64,16 @@ class PartnerSerializer(serializers.ModelSerializer):
         validated_data['owner'] = self.context['request'].user
         validated_data['franchiser'] = self.context['request'].user
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        tasks = validated_data.pop('tasks', [])
+        instance = super(PartnerSerializer, self).update(instance, validated_data)
+        tasks_obj = []
+        for task_data in tasks:
+            task = Task.objects.get(**task_data)
+            tasks_obj.append(task)
+        instance.tasks.set(tasks_obj)
+        return instance
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -65,8 +95,6 @@ class UserLoginSerializer(serializers.Serializer):
 
     def check_user(self, validated_data):
         user = authenticate(username=validated_data['username'], password=validated_data['password'])
-        if not user:
-            raise ValidationError('User not found.')
         return user
 
 
@@ -82,14 +110,5 @@ class UsernameSerializer(serializers.ModelSerializer):
         fields = ('username', )
         
 
-class TaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ('id', 'title', 'description', 'duration', 'related_ids')
-        
-        
-class CreateTaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ('title', 'description', 'duration', 'related_ids')
+
         

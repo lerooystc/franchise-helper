@@ -12,27 +12,34 @@ import { Dashboard } from "./Dashboard";
 import Partner from "./Partner";
 import { Location } from "./Location";
 import { Contractor } from "./Contractor";
+import { TaskPage } from "./TaskPage";
 import { AuthProvider } from "./AuthProvider";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import 'dayjs/locale/de';
 
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <Navigation />
-        <Box sx={{ height: '100%' }}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/partner/:id" element={<ProtectedRoute><Partner /></ProtectedRoute>} />
-            <Route path="/location/:id" element={<ProtectedRoute><Location /></ProtectedRoute>} />
-            <Route path="/contractor/:id" element={<ProtectedRoute><Contractor /></ProtectedRoute>} />
-            <Route path="/news/:page" element={<News />} />
-          </Routes>
-        </Box>
-      </Router>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="de">
+        <Router>
+          <Navigation />
+          <Box sx={{ height: '90%' }}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/dashboard/tasks" element={<ProtectedRoute><TaskPage /></ProtectedRoute>} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/partner/:id" element={<ProtectedRoute><Partner /></ProtectedRoute>} />
+              <Route path="/location/:id" element={<ProtectedRoute><Location /></ProtectedRoute>} />
+              <Route path="/contractor/:id" element={<ProtectedRoute><Contractor /></ProtectedRoute>} />
+              <Route path="/news/:page" element={<News />} />
+            </Routes>
+          </Box>
+        </Router>
+      </LocalizationProvider>
     </AuthProvider>
   )
 }

@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/', index),
     path('register/', index),
     path('dashboard/', index),
+    path('dashboard/tasks/', index),
     path('partner/<int:id>/', index),
     path('location/<int:id>/', index),
     path('news/<int:page>/', index),

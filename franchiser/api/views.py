@@ -7,12 +7,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .serializers import *
 from .models import Partner, Contractor, Location, Article, Task
+from django.db.models import F
 from .permissions import *
 
 
 class PartnerViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwner]
-    queryset = Partner.objects.select_related('franchiser').prefetch_related('locations', 'contractors')
+    queryset = Partner.objects.select_related('franchiser').prefetch_related('locations', 'contractors', 'tasks')
     serializer_class = PartnerSerializer
     
     def list(self, request):
@@ -80,6 +81,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    
+    def destroy(self, request, *args, **kwargs):
+       task_id = self.get_object().local_id
+       Task.objects.filter(local_id__gt=task_id).update(local_id=F('local_id')-1)
+       return super(TaskViewSet, self).destroy(request, *args, **kwargs)
+    
     @action(methods=['post'], detail=False)
     def bulk_save(self, request):
         update_data = { 
@@ -125,8 +132,11 @@ class UserLogin(APIView):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.check_user(request.data)
-            login(request, user)
-            return Response({"Token": Token.objects.get_or_create(user=user)[0].key}, status=status.HTTP_200_OK)
+            if user:
+                login(request, user)
+                return Response({"Token": Token.objects.get_or_create(user=user)[0].key}, status=status.HTTP_200_OK)
+            else:
+                return Response("Not Found", status=status.HTTP_404_NOT_FOUND)
 
 
 class UserLogout(APIView):

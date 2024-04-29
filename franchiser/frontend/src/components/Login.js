@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Alert from "@mui/material/Alert";
 import { Link } from "react-router-dom";
 import { withRouter } from '../withRouter';
 import { useAuthContext } from './AuthProvider';
@@ -11,6 +12,7 @@ function Login(props) {
   const { onLogin } = useAuthContext();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(false);
 
   const handleLoginChange = (e) => {
     setLogin(e.target.value);
@@ -20,9 +22,13 @@ function Login(props) {
     setPassword(e.target.value);
   }
 
-  const loginPressed = () => {
-    onLogin(login, password);
-    props.navigate('/');
+  const loginPressed = async () => {
+    const logged_on = await onLogin(login, password);
+    if (logged_on) props.navigate('/');
+    else {
+      setError(true);
+      setTimeout(() => setError(false), 5000);
+    };
   }
 
   
@@ -45,6 +51,7 @@ function Login(props) {
             Назад
           </Button>
         </Grid>
+        {error && <Alert severity="error" sx={{mt: 5}}>Не удалось войти. Проверьте данные.</Alert>}
       </Grid>
     );
 }

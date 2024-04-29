@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Grid, Typography, Stack, IconButton } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
 import { Link } from "react-router-dom";
-import { Grid, Typography, Stack, Button } from "@mui/material";
 import { get_partners, get_tasks } from "../network";
 import PartnerList from "./PartnerList";
+import Gantt from "./Gantt";
 
 export const Dashboard = () => {
   const [partners, setPartners] = useState(null);
@@ -30,30 +32,22 @@ export const Dashboard = () => {
 
 
   return (
-    <Grid container justifyContent='center' spacing={3}>
-      <Grid item xs={6} align="center">
+    <Grid container justifyContent='center'>
+      <Grid item xs={4} align="center">
         <Stack spacing={2} direction="column" alignItems="center" justifyContent="center">
           <Typography component='h4' variant='h4'>Партнеры</Typography>
           <PartnerList partners={partners} />
         </Stack>
       </Grid>
-      <Grid item xs={6} align="center">
+      <Grid item xs={4} align="center">
         <Stack spacing={2} direction="column" alignItems="center" justifyContent="center">
-          <Typography component='h4' variant='h4'>Шаблон этапов</Typography>
-          <Stack spacing={1}>
-            {
-              tasks?.map(task => {
-                return (
-                  <Stack key={task.id} spacing={2} direction="row" alignItems="center" justifyContent="space-around">
-                    <Typography variant="h6">{task.title}</Typography>
-                    <Typography variant="h6">{task.description}</Typography>
-                    <Typography variant="h6">{task.duration}</Typography>
-                    <Typography variant="h6">{task.related_ids}</Typography>
-                  </Stack>
-                )
-              })
-            }
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography component='h4' variant='h4'>Шаблон этапов</Typography>
+            <IconButton to="/dashboard/tasks" component={Link} size="medium" color="primary">
+              <EditIcon fontSize="medium" />
+            </IconButton>
           </Stack>
+          {tasks && <Gantt tasks={tasks} start_date={new Date()}></Gantt>}
         </Stack>
       </Grid>
     </Grid>

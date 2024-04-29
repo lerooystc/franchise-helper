@@ -8,8 +8,10 @@ export async function login_account(username, password) {
     }),
   };
   const response = await fetch(`/api/login/`, requestOptions);
-  const json = await response.json();
-  return json["Token"];
+  if (response.status !== '404') {
+    const json = await response.json();
+    return json["Token"];
+  }
 }
 
 export function register_account(username, email, password) {
@@ -130,7 +132,7 @@ export async function edit_location(key, name) {
 export async function get_news(page) {
   const requestOptions = {
     method: "GET",
-    headers: { "Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
   };
   const response = await fetch('/api/articles/?page=' + page, requestOptions);
   const json = await response.json();
@@ -140,7 +142,7 @@ export async function get_news(page) {
 export async function delete_location(key) {
   const requestOptions = {
     method: "DELETE",
-    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token')},
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
   };
   await fetch(`/api/locations/${key}/`, requestOptions);
 }
@@ -171,7 +173,7 @@ export async function edit_contractor(key, name) {
 export async function delete_contractor(key) {
   const requestOptions = {
     method: "DELETE",
-    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token')},
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
   };
   await fetch(`/api/contractors/${key}/`, requestOptions);
 }
@@ -179,9 +181,39 @@ export async function delete_contractor(key) {
 export async function get_tasks() {
   const requestOptions = {
     method: "GET",
-    headers: { "Content-Type": "application/json",  "Authorization": "Token " + localStorage.getItem('token')},
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
   };
   const response = await fetch('/api/tasks/', requestOptions);
+  const json = await response.json();
+  return json;
+}
+
+export async function add_tasks(tasks) {
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+    body: JSON.stringify(tasks),
+  };
+  const response = await fetch(`/api/tasks/bulk_save/`, requestOptions);
+  const json = await response.json();
+  return json;
+}
+
+export async function delete_task(key) {
+  const requestOptions = {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+  };
+  await fetch(`/api/tasks/${key}/`, requestOptions);
+}
+
+export async function edit_partner(key, partner) {
+  const requestOptions = {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+    body: JSON.stringify(partner),
+  };
+  const response = await fetch(`/api/partners/${key}/`, requestOptions);
   const json = await response.json();
   return json;
 }
