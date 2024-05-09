@@ -3,12 +3,15 @@ import { Grid, Typography, Stack, IconButton } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import { Link } from "react-router-dom";
 import { get_partners, get_tasks } from "../network";
-import PartnerList from "./PartnerList";
+import PartnerCard from "./PartnerCard";
 import Gantt from "./Gantt";
+import PartnerCreation from "./PartnerCreation";
 
 export const Dashboard = () => {
   const [partners, setPartners] = useState(null);
   const [tasks, setTasks] = useState(null);
+  const [tasksLoaded, setTasksLoaded] = useState(false);
+  const [changed, setChanged] = useState(false);
 
   const getPartners = async () => {
     const data = await get_partners();
@@ -23,20 +26,32 @@ export const Dashboard = () => {
   useEffect(() => {
     (async () => {
       await getPartners();
-      await getTasks();
+      if (!tasksLoaded) await getTasks();
     })();
 
     return () => {
     };
-  }, []);
+  }, [changed]);
 
+  const handleChange = () => {
+    setChanged(!changed);
+  }
 
   return (
-    <Grid container justifyContent='center'>
+    <Grid container justifyContent='center' spacing={4}>
       <Grid item xs={4} align="center">
         <Stack spacing={2} direction="column" alignItems="center" justifyContent="center">
-          <Typography component='h4' variant='h4'>Партнеры</Typography>
-          <PartnerList partners={partners} />
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography component='h4' variant='h4'>Партнеры</Typography>
+            <PartnerCreation onChange={handleChange}></PartnerCreation>
+          </Stack>
+          <Stack spacing={1} alignItems="start" justifyContent="center" width="100%" textAlign="start">
+            {
+              partners?.map(partner => {
+                return <PartnerCard key={partner.id} data={partner} />
+              })
+            }
+          </Stack>
         </Stack>
       </Grid>
       <Grid item xs={4} align="center">

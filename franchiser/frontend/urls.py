@@ -11,4 +11,5 @@ urlpatterns = [
     path('location/<int:id>/', index),
     path('news/<int:page>/', index),
     path('contractor/<int:id>/', index),
+    path('analysis/<int:id>/', index),
 ]

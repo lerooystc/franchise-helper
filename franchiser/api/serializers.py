@@ -1,4 +1,4 @@
-from .models import Partner, Location, Contractor, Article, Task
+from .models import Partner, Location, Contractor, Article, Task, Analysis, Notification
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model, authenticate
@@ -31,6 +31,22 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        
+
+class AnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analysis
+        fields = ('id', 'partner', 'criteria', 'added_on', 'cases', 'finished', 'access_code')
+        
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
+
+
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
@@ -54,11 +70,11 @@ class ContractorSerializer(serializers.ModelSerializer):
 class PartnerSerializer(serializers.ModelSerializer):
     locations = LocationSerializer(many=True, read_only=True)
     contractors = ContractorSerializer(many=True, read_only=True)
-    tasks = TaskSerializer(many=True)
+    tasks = TaskSerializer(many=True, required=False)
     
     class Meta:
         model = Partner
-        fields = '__all__'
+        fields = ('id', 'name', 'city', 'gantt_created', 'starting_date', 'locations', 'contractors', 'tasks')
         
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user

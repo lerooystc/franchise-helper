@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .serializers import *
-from .models import Partner, Contractor, Location, Article, Task
+from .models import Partner, Contractor, Location, Article, Task, Notification
 from django.db.models import F
 from .permissions import *
 
@@ -33,6 +33,48 @@ class ContractorViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsSuperUser, ]
         return super(self.__class__, self).get_permissions()
 
+
+class AnalysisViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwner]
+    queryset = Analysis.objects.all()
+    serializer_class = AnalysisSerializer
+    
+    def get_permissions(self):
+        if self.action == 'list':
+            self.permission_classes = [perms.IsAuthenticated, ]
+        elif self.action == 'retrieve' or 'update':
+            self.permission_classes = [perms.AllowAny, ]
+        return super(self.__class__, self).get_permissions()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(owner=request.user)
+        if partner := request.GET.get('partner'):
+            queryset = queryset.filter(partner=partner)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+             
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.GET.get('code', 0) == instance.access_code:
+            return super(AnalysisViewSet, self).retrieve(request, *args, **kwargs) 
+        else: 
+            return Response({"Forbidden": "Wrong access code."}, status=status.HTTP_403_FORBIDDEN) 
+        
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.data.get('access_code') == instance.access_code:
+            Notification.objects.create(franchiser=instance.owner, title="Был завершен анализ.", link=f"analysis/{instance.id}")
+            return super(AnalysisViewSet, self).update(request, *args, **kwargs) 
+        else: 
+            return Response({"Forbidden": "Wrong access code."}, status=status.HTTP_403_FORBIDDEN) 
+    
+    def create(self, request, format=None):
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            obj = serializer.save()
+            return Response({'id': obj.id, 'code': obj.access_code}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LocationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwner]
@@ -153,3 +195,21 @@ class UserView(APIView):
         serializer = UserSerializer(request.user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
 
+
+class GetNotifications(APIView):
+    permission_classes = [perms.IsAuthenticated]
+
+    def get(self, request):
+        queryset = Notification.objects.filter(franchiser=request.user, seen=False).order_by('-added_on')
+        if (n := queryset.count()) < 10:
+            queryset = queryset | Notification.objects.filter(franchiser=request.user).order_by('-added_on')[n:11]
+        serializer = NotificationSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class NotificationsChecked(APIView):
+    permission_classes = [perms.IsAuthenticated]
+
+    def patch(self, request):
+        Notification.objects.filter(franchiser=request.user, seen=False).update(seen=True)
+        return Response({"Acknowledged": "Notifications updated"}, status=status.HTTP_200_OK)    

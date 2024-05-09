@@ -18,6 +18,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import 'dayjs/locale/de';
+import AnalysisView from "./AnalysisView";
 
 const App = () => {
   return (
@@ -35,6 +36,7 @@ const App = () => {
               <Route path="/partner/:id" element={<ProtectedRoute><Partner /></ProtectedRoute>} />
               <Route path="/location/:id" element={<ProtectedRoute><Location /></ProtectedRoute>} />
               <Route path="/contractor/:id" element={<ProtectedRoute><Contractor /></ProtectedRoute>} />
+              <Route path="/analysis/:id" element={<AnalysisView />} />
               <Route path="/news/:page" element={<News />} />
             </Routes>
           </Box>

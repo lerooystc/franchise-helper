@@ -8,7 +8,7 @@ export async function login_account(username, password) {
     }),
   };
   const response = await fetch(`/api/login/`, requestOptions);
-  if (response.status !== '404') {
+  if (response.status !== 404) {
     const json = await response.json();
     return json["Token"];
   }
@@ -216,4 +216,86 @@ export async function edit_partner(key, partner) {
   const response = await fetch(`/api/partners/${key}/`, requestOptions);
   const json = await response.json();
   return json;
+}
+
+export async function add_partner(partner) {
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+    body: JSON.stringify(partner),
+  };
+  const response = await fetch(`/api/partners/`, requestOptions);
+  const json = await response.json();
+  return json;
+}
+
+export async function add_analysis(analysis) {
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+    body: JSON.stringify(analysis),
+  };
+  const response = await fetch(`/api/analyses/`, requestOptions);
+  const json = await response.json();
+  return json;
+}
+
+export async function get_analysis(key, code) {
+  const requestOptions = {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  };
+  const response = await fetch(`/api/analyses/${key}?code=${code}`, requestOptions);
+  if (response.status !== 403) {
+    const json = await response.json();
+    return json;
+  }
+}
+
+export async function get_analyses(partner) {
+  const requestOptions = {
+    method: "GET",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+  };
+  console.log(partner);
+  const response = await fetch('/api/analyses?' + new URLSearchParams({partner: partner}), requestOptions);
+  if (response.status !== 403) {
+    const json = await response.json();
+    return json;
+  }
+}
+
+export async function edit_analysis(analysis) {
+  const requestOptions = {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(analysis),
+  };
+  const response = await fetch(`/api/analyses/${analysis.id}/`, requestOptions);
+  const json = await response.json();
+  return json;
+}
+
+export async function get_notifications() {
+  const requestOptions = {
+    method: "GET",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+  };
+  const response = await fetch('/api/notifications/', requestOptions);
+  if (response.status !== 403) {
+    const json = await response.json();
+    return json;
+  }
+}
+
+export async function mark_as_seen() {
+  const requestOptions = {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+  };
+  const response = await fetch('/api/notifications_checked/', requestOptions);
+  if (response.status !== 403) {
+    const json = await response.json();
+    return json;
+  }
 }

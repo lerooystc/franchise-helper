@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { get_partner, edit_partner, delete_location, delete_contractor, get_tasks } from "../network";
-import { Grid, IconButton, Stack, Button, Typography, FormGroup, FormControlLabel, Checkbox, Alert } from "@mui/material";
+import { Grid, IconButton, Stack, Button, Typography, FormGroup, FormControlLabel, Checkbox, Alert, Menu, MenuItem } from "@mui/material";
 import dayjs from "dayjs";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
@@ -15,6 +15,8 @@ import LocationCreation from "./LocationCreation";
 import ContractorCreation from "./ContractorCreation";
 import Gantt from "./Gantt";
 import ConfirmationDialog from "./ConfirmationDialog";
+import Analysis from "./Analysis";
+import AnalysisList from "./AnalysisList";
 
 
 const Partner = () => {
@@ -24,9 +26,12 @@ const Partner = () => {
   const [bpTasks, setBpTasks] = useState([]);
   const [creation, setCreation] = useState(null);
   const [fullscreen, setFullscreen] = useState(false);
+  const [analysisMode, setAnalysisMode] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [chosen, setChosen] = useState(null);
   const [type, setType] = useState(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
 
   useEffect(() => {
     (async () => {
@@ -44,6 +49,15 @@ const Partner = () => {
   const createMode = (vare) => {
     setCreation(vare);
   }
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = (type) => {
+    setAnalysisMode(type);
+    setAnchorEl(null);
+  };
 
   const handle_change = React.useCallback((new_value) => {
     setChanged(new_value);
@@ -65,7 +79,7 @@ const Partner = () => {
     setType(type);
   }
 
-  const handleDelete = async (decision, type) => {
+  const handleDelete = async (decision) => {
     setDialogOpen(false);
     if (decision) {
       if (type == 'location') {
@@ -98,7 +112,16 @@ const Partner = () => {
     <>
       <Grid container spacing={4} justifyContent="center">
         <Grid item xs={12} align="center">
-          <Typography component='h4' variant='h4'>{partner.name}</Typography>
+          <Stack spacing={4} direction="row" alignItems="center" justifyContent="center">
+            <Typography component='h4' variant='h4'>{partner.name}</Typography>
+            <Button onClick={handleMenuOpen} size="large" variant="outlined">Анализ</Button>
+            <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
+              <MenuItem onClick={() => handleMenuClose(1)}>Список</MenuItem>
+              <MenuItem onClick={() => handleMenuClose(2)}>Создать</MenuItem>
+            </Menu>
+            {analysisMode === 1 && <AnalysisList onClose={() => setAnalysisMode(0)} partner={partner.id}></AnalysisList>}
+            {analysisMode === 2 && <Analysis onClose={() => setAnalysisMode(0)} partner={partner.id}></Analysis>}
+          </Stack>
         </Grid>
         {!fullscreen && (<><Grid item xs={3} align="start">
           <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -147,7 +170,7 @@ const Partner = () => {
           <Stack spacing={2} direction="row" alignItems="center" justifyContent={!fullscreen ? "space-between" : "center"}>
             <Typography component='h5' variant='h5'>Этапы</Typography>
             <Stack direction="row">
-              { partner.gantt_created &&
+              {partner.gantt_created &&
                 <IconButton onClick={() => setPartner({ ...partner, gantt_created: !partner.gantt_created })} size="medium" color="primary">
                   <EditIcon fontSize="medium" />
                 </IconButton>

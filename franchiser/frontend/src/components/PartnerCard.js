@@ -1,16 +1,49 @@
-import React from "react";
-import { Typography, Card, CardActionArea, CardContent } from '@mui/material';
+import React, { useState } from "react";
+import { Typography, Card, IconButton, CardHeader, Menu, MenuItem } from '@mui/material';
 import { withRouter } from '../withRouter';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 function PartnerCard(props) {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleOpen = () => {
+    props.onDialogOpen(props.data.id, 'partner');
+    handleClose();
+  }
+
   return (
-    <Card sx={{ maxWidth: 345 }}>
-      <CardActionArea>
-        <CardContent onClick={() => props.navigate(`/partner/${props.data.id}`)}>
-          <Typography variant="h6">{props.data.name}</Typography>
-        </CardContent>
-      </CardActionArea>
-    </Card>
+    <>
+      <Card sx={{ minWidth: 1 }}>
+        <CardHeader onClick={() => props.navigate(`/partner/${props.data.id}`)} action={
+          <div>
+            <IconButton onClick={event => {
+              event.stopPropagation();
+              event.preventDefault();
+              handleClick(event);
+            }} aria-label="settings">
+              <MoreVertIcon />
+            </IconButton>
+          </div>
+        }
+          title={
+            <Typography display="inline" variant="h6">{props.data.name}</Typography>
+          }
+        >
+        </CardHeader>
+      </Card>
+      <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
+        <MenuItem onClick={handleOpen}>Удалить</MenuItem>
+      </Menu>
+    </>
   );
 }
 

@@ -5,10 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
 import Stack from '@mui/material/Stack'
 import { Link } from 'react-router-dom';
 import { useAuthContext } from './AuthProvider';
+import Notifications from './Notifications';
 
 
 export default function ButtonAppBar() {
@@ -18,28 +19,24 @@ export default function ButtonAppBar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar color="transparent" sx={{ boxShadow: 0 }} position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Stack sx={{ flexGrow: 1 }} spacing={2} direction='row'>
-            <Typography variant="h6" color="inherit" component={Link} to="/" sx={{ textDecoration: 'none' }}>
-              Home
-            </Typography>
-            <Typography variant="h6" color="inherit" component={Link} to="/dashboard" sx={{ textDecoration: 'none' }}>
-              Dashboard
-            </Typography>
+          <Stack sx={{ flexGrow: 1 }} spacing={2} direction='row' alignItems="center">
+            <IconButton component={Link} to="/">
+              <HomeIcon />
+            </IconButton>
+            {token && (
+              <Typography variant="h6" color="inherit" component={Link} to="/dashboard" sx={{ textDecoration: 'none' }}>
+                Кабинет
+              </Typography>
+            )}
             <Typography variant="h6" color="inherit" component={Link} to="/news/1" sx={{ textDecoration: 'none' }}>
-              News
+              Новости
             </Typography>
           </Stack>
           {token ? (
-            <Button onClick={onLogout} to="/" component={Link} color="inherit">Logout</Button>
+            <Stack direction="row" alignItems="center" justifyContent="center">
+              <Notifications></Notifications>
+              <Button onClick={onLogout} to="/" component={Link} color="inherit">Logout</Button>
+            </Stack>
           ) : (
             <Button to="/login" component={Link} color="inherit">Login</Button>
           )}

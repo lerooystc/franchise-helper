@@ -1,4 +1,17 @@
 from django.db import models
+import random
+import string
+
+
+def generate_unique_code():
+    length = 8
+
+    while True:
+        code = ''.join(random.choices(string.ascii_uppercase, k=length))
+        if Analysis.objects.filter(access_code=code).count() == 0:
+            break
+
+    return code
 
 
 class OwnedModel(models.Model):
@@ -47,3 +60,20 @@ class Article(models.Model):
     
     def __str__(self):
         return self.title
+    
+
+class Analysis(OwnedModel):
+    partner = models.ForeignKey("Partner", on_delete=models.CASCADE, related_name="analyses")
+    criteria = models.JSONField()
+    cases = models.JSONField(null=True, blank=True)
+    finished = models.BooleanField()
+    added_on = models.DateTimeField(auto_now_add=True)
+    access_code = models.CharField(max_length=8, default=generate_unique_code, unique=True)
+    
+    
+class Notification(models.Model):
+    franchiser = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="notifications")
+    seen = models.BooleanField(default=False)
+    title = models.CharField(max_length=200)
+    link = models.CharField(max_length=200)
+    added_on = models.DateTimeField(auto_now_add=True)
