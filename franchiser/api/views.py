@@ -49,7 +49,7 @@ class AnalysisViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(owner=request.user)
         if partner := request.GET.get('partner'):
-            queryset = queryset.filter(partner=partner)
+            queryset = queryset.filter(partner=partner) 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
              
@@ -63,7 +63,7 @@ class AnalysisViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         if request.data.get('access_code') == instance.access_code:
-            Notification.objects.create(franchiser=instance.owner, title="Был завершен анализ.", link=f"analysis/{instance.id}")
+            Notification.objects.create(franchiser=instance.owner, title="Был завершен анализ \"" + instance.title + "\".", link=f"analysis/{instance.id}")
             return super(AnalysisViewSet, self).update(request, *args, **kwargs) 
         else: 
             return Response({"Forbidden": "Wrong access code."}, status=status.HTTP_403_FORBIDDEN) 
@@ -75,6 +75,13 @@ class AnalysisViewSet(viewsets.ModelViewSet):
             obj = serializer.save()
             return Response({'id': obj.id, 'code': obj.access_code}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(methods=['get'], detail=False)
+    def get_templates(self, request):
+        queryset = self.get_queryset().filter(owner=request.user, is_template=True)
+        serializer = TemplateSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
 
 class LocationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwner]
@@ -122,7 +129,6 @@ class TaskViewSet(viewsets.ModelViewSet):
             serializer.save(owner=request.user, franchiser=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
     
     def destroy(self, request, *args, **kwargs):
        task_id = self.get_object().local_id

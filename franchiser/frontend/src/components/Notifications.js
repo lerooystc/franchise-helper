@@ -47,14 +47,14 @@ export default function Notifications() {
           horizontal: 'left',
         }}
       >
-        <Stack direction="column" justifyContent="center" alignItems="center">
+        <Stack width="400px" direction="column" justifyContent="center" alignItems="start">
           {notifications.map(notification => {
             return <div key={notification.id}>
               <Stack sx={{p: 1}} spacing={2} direction="column" justifyContent="start" alignItems="start">
                 <Typography component={Link} to={notification.link} color="#000" variant={"body1"} sx={!notification.seen ? {fontWeight: "bold"} : {}}>{notification.title}</Typography>
                 <Typography variant="body1">{dayjs(notification.added_on).format("DD/MM HH:mm")}</Typography>
               </Stack>
-              <Divider />
+              <Divider width="400px"/>
             </div>
           })}
         </Stack>

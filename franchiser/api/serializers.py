@@ -40,12 +40,18 @@ class NotificationSerializer(serializers.ModelSerializer):
 class AnalysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = Analysis
-        fields = ('id', 'partner', 'criteria', 'added_on', 'cases', 'finished', 'access_code')
+        fields = ('id', 'partner', 'title', 'criteria', 'added_on', 'cases', 'finished', 'access_code', 'is_template')
         
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
+    
 
+class TemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analysis
+        fields = ('id', 'title', 'criteria')
+        
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:

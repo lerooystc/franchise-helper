@@ -64,11 +64,13 @@ class Article(models.Model):
 
 class Analysis(OwnedModel):
     partner = models.ForeignKey("Partner", on_delete=models.CASCADE, related_name="analyses")
+    title = models.CharField(max_length=100)
     criteria = models.JSONField()
     cases = models.JSONField(null=True, blank=True)
     finished = models.BooleanField()
     added_on = models.DateTimeField(auto_now_add=True)
     access_code = models.CharField(max_length=8, default=generate_unique_code, unique=True)
+    is_template = models.BooleanField()
     
     
 class Notification(models.Model):

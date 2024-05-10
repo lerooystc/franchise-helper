@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Modal, TextField, IconButton, Box, Typography, Button, Stack, Menu, MenuItem, FormControl, Select, InputLabel, Link } from '@mui/material';
+import React, { useState, useEffect } from "react";
+import { Modal, TextField, IconButton, Box, Typography, Button, Stack, Menu, MenuItem, FormControl, Select, InputLabel, Link, Checkbox, FormControlLabel } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { add_analysis, add_partner } from "../network";
+import { add_analysis, get_templates } from "../network";
 
 const style = {
   position: 'absolute',
@@ -19,6 +19,10 @@ export default function Analysis(props) {
   const [added, setAdded] = useState(false);
   const [accessData, setAccessData] = useState(null);
   const [fields, setFields] = useState([]);
+  const [analysisTitle, setAnalysisTitle] = useState("Новый анализ");
+  const [templates, setTemplates] = useState([]);
+  const [templateChosen, setTemplateChosen] = useState('');
+  const [isTemplate, setIsTemplate] = useState(false);
   const [error, setError] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentId, setCurrentId] = useState(1);
@@ -31,6 +35,13 @@ export default function Analysis(props) {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    (async () => {
+      const data = await get_templates();
+      setTemplates(data);
+    })();
+  }, [])
 
   const addField = (type) => {
     const field = (() => {
@@ -61,8 +72,8 @@ export default function Analysis(props) {
   };
 
   const handleAdding = async () => {
-    if (fields.every((el) => Object.values(el).every(e => e))) {
-      const analysis = { partner: props.partner, criteria: fields, finished: false, cases: [] };
+    if (fields.every((el) => Object.values(el).every(e => e)) && analysisTitle) {
+      const analysis = { partner: props.partner, title: analysisTitle, criteria: fields, finished: false, cases: [], is_template: isTemplate };
       const results = await add_analysis(analysis);
       setAccessData(results);
       setAdded(true);
@@ -70,13 +81,12 @@ export default function Analysis(props) {
   }
 
   const handleChange = (newField) => {
-    console.log(newField);
     setFields(fields?.map(field => {
       if (field.id === newField.id) {
         return newField;
       } else return field;
     }));
-    console.log(fields);
+    console.log(templates);
   }
 
   return (
@@ -116,9 +126,31 @@ export default function Analysis(props) {
                 <MenuItem onClick={() => addField("number")}>Число</MenuItem>
                 <MenuItem onClick={() => addField("range")}>Рамки</MenuItem>
               </Menu>
+              <Stack spacing={2} direction="row" alignItems="center" justifyContent="center">
+                <TextField error={error && !analysisTitle} label="Название анализа" value={analysisTitle} onChange={(e) => setAnalysisTitle(e.target.value)} />
+                <FormControl sx={{ m: 1, width: 210 }}>
+                  <InputLabel id="template">Шаблон</InputLabel>
+                  <Select
+                    labelId="template"
+                    value={templateChosen}
+                    label="Шаблон"
+                    onChange={(e) => {
+                      setTemplateChosen(e.target.value);
+                      const template = templates.find(x => x.id === e.target.value);
+                      setFields(template.criteria);
+                      setCurrentId(template.criteria.length + 1);
+                    }}
+                  >
+                    {templates?.map(template => {
+                      return <MenuItem key={template.id} value={template.id}>{template.title}</MenuItem>
+                    })}
+                  </Select>
+                </FormControl>
+                <FormControlLabel label="Сохранить как шаблон" control={<Checkbox checked={isTemplate} onChange={(e) => { setIsTemplate(e.target.checked) }} />} />
+              </Stack>
               <Stack spacing={2} sx={{ px: 4, mt: 2, maxHeight: "50vh", overflowY: "auto" }}>
                 {fields?.map(field => {
-                  return <Stack spacing={3} direction="row" alignItems="center" justifyContent="space-between">
+                  return <Stack key={field.id} spacing={3} direction="row" alignItems="center" justifyContent="space-between">
                     <TextField width="166px" required error={error && !field.title} label="Критерий" value={field.title} onChange={(e) => {
                       field.title = e.target.value;
                       handleChange(field)

@@ -299,3 +299,16 @@ export async function mark_as_seen() {
     return json;
   }
 }
+
+export async function get_templates(partner) {
+  const requestOptions = {
+    method: "GET",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+  };
+  console.log(partner);
+  const response = await fetch('/api/analyses/get_templates/', requestOptions);
+  if (response.status !== 403) {
+    const json = await response.json();
+    return json;
+  }
+}

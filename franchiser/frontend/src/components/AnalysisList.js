@@ -50,7 +50,7 @@ export default function PartnerCreation(props) {
               return <div key={index}>
                 <Stack spacing={4} width="100%" direction="row" justifyContent="space-between">
                   <div>
-                    <Typography color="#111" component={Link} to={`/analysis/${analysis.id}`} variant="h6">#{analyses.length - index}</Typography>
+                    <Typography color="#111" component={Link} to={`/analysis/${analysis.id}`} variant="h6">#{analyses.length - index} {analysis.title}</Typography>
                     <Typography variant="h6">{dayjs(analysis.added_on).format('DD/MM/YYYY HH:mm')}</Typography>
                     <Typography variant="h6">Код доступа: {analysis.access_code}</Typography>
                   </div>
