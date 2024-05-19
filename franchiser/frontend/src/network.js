@@ -312,3 +312,11 @@ export async function get_templates(partner) {
     return json;
   }
 }
+
+export async function delete_partner(key) {
+  const requestOptions = {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json", "Authorization": "Token " + localStorage.getItem('token') },
+  };
+  await fetch(`/api/partners/${key}/`, requestOptions);
+}

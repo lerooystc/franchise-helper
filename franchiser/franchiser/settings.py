@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1",]
 
 
 # Application definition
@@ -85,10 +85,15 @@ WSGI_APPLICATION = 'franchiser.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get('DB_NAME'),
+        "USER": os.environ.get('DB_USER'),
+        "PASSWORD": os.environ.get('DB_USER_PASSWORD'),
+        "HOST": os.environ.get('DB_HOST'),
+        "PORT": os.environ.get('DB_PORT'),
     }
 }
+
 
 
 # Password validation
@@ -155,7 +160,8 @@ REST_FRAMEWORK = {
 }
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = f'amqp://{os.environ.get("R_USER")}:{os.environ.get("R_PASSWORD")}@rabbit'
+CELERY_BROKER_CONNECTION_TIMEOUT = 120
 
 CELERY_BEAT_SCHEDULE = {
     "get_articles": {

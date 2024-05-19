@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${R_USER}
+      - RABBITMQ_DEFAULT_PASS=${R_PASSWORD}
+    ports:
+      - "5672:5672"  
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+  web:
+    build: 
+      dockerfile: ./Dockerfile
+    command: sh ./run_web.sh
+    volumes:
+      - ./franchiser:/usr/src/franchiser/
+    ports:
+      - 10000:8000
+    environment:
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
+    depends_on:
+      - db
+    env_file:
+      - .env
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh ./run_celery.sh
+    volumes:
+      - ./franchiser:/usr/src/franchiser/
+    links:
+      - rabbit
+    depends_on:
+      - rabbit
+    env_file:
+      - .env
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh ./run_beat.sh
+    volumes:
+      - ./franchiser:/usr/src/franchiser/
+    links:
+      - rabbit
+    depends_on:
+      - rabbit
+    env_file:
+      - .env
+  

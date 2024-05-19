@@ -149,14 +149,14 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         for inst in self.get_queryset().filter(id__in=update_data.keys()):
             serializer = self.get_serializer(inst, data=update_data[inst.id], partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
         
         post_serializer = self.get_serializer(data=post_data, many=True)
         if post_serializer.is_valid():
             post_serializer.save(owner=request.user, franchiser=request.user)
 
-        return Response([serializer.data, post_serializer.data], status=status.HTTP_201_CREATED)
+        return Response({"Created": "Created and/or updated the tasks."}, status=status.HTTP_201_CREATED)
 
 
 class UserRegister(APIView):

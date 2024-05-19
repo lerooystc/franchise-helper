@@ -63,7 +63,7 @@ const Gantt = (props) => {
         (task.parents ? task.parents.toString() : null),
       ])
     });
-
+  
   rows[0][2] = new Date(props.start_date);
   const data = [columns, ...rows];
 

@@ -15,8 +15,13 @@ function PartnerCard(props) {
     setAnchorEl(null);
   };
 
-  const handleOpen = () => {
-    props.onDialogOpen(props.data.id, 'partner');
+  const handleDelete = () => {
+    props.onDialogOpen(props.data.id);
+    handleClose();
+  }
+
+  const handleEdit = () => {
+    props.onEdit(props.data);
     handleClose();
   }
 
@@ -41,7 +46,8 @@ function PartnerCard(props) {
         </CardHeader>
       </Card>
       <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
-        <MenuItem onClick={handleOpen}>Удалить</MenuItem>
+        <MenuItem onClick={handleEdit}>Изменить</MenuItem>
+        <MenuItem onClick={handleDelete}>Удалить</MenuItem>
       </Menu>
     </>
   );

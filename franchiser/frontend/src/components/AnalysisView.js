@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Grid, Typography, IconButton, TextField, Button, Stack, Checkbox } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { edit_analysis, get_analysis } from "../network";
 
 export default function AnalysisView() {
   const { id } = useParams();
-  const [code, setCode] = useState("");
+  const [refer] = useSearchParams();
+  const [code, setCode] = useState(refer.get("ac") || "");
   const [analysis, setAnalysis] = useState(null);
   const [access, setAccess] = useState(false);
   const [error, setError] = useState(false);
