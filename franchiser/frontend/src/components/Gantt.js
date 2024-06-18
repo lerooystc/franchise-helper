@@ -6,7 +6,6 @@ function daysToMilliseconds(days) {
 }
 
 
-
 const Gantt = (props) => {
 
   const columns = [
@@ -18,37 +17,6 @@ const Gantt = (props) => {
     { type: "number", label: "Percent Complete" },
     { type: "string", label: "Dependencies" },
   ];
-
-  // const rows = [
-  //   [
-  //     "1",
-  //     "1st",
-  //     new Date(2015, 0, 1),
-  //     null,
-  //     daysToMilliseconds(1),
-  //     100,
-  //     null,
-  //   ],
-  //   [
-  //     "2",
-  //     "2nd",
-  //     null,
-  //     null,
-  //     daysToMilliseconds(3),
-  //     25,
-  //     "1",
-  //   ],
-  //   [
-  //     "3",
-  //     "3rd",
-  //     null,
-  //     null,
-  //     daysToMilliseconds(3),
-  //     25,
-  //     "1,2",
-  //   ],
-
-  // ];
 
   const rows = [];
 
